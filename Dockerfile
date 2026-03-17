@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage ----
-FROM golang:1.23-alpine AS builder
-
-# Allow the Go toolchain manager to download the version required by go.mod.
-ENV GOTOOLCHAIN=auto
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
