@@ -8,7 +8,7 @@ Gopher-Pulse is a Go observability agent that collects metrics from multiple pro
 
 Primary stack and defaults:
 
-- Go 1.24+
+- Go 1.25+
 - OpenTelemetry Go SDK for metrics
 - Prometheus exporter for scraping
 - Podman and compose files for local runtime
@@ -42,7 +42,6 @@ Unless the user asks for a different shape, use this project structure when crea
 │   │   └── synthetic/
 │   ├── telemetry/
 │   └── config/
-├── deployments/
 ├── Makefile
 ├── go.mod
 ├── AGENTS.md
@@ -98,7 +97,7 @@ curl http://localhost:9464/metrics
 
 Use standard Go patterns by default:
 
-- Prefer small structs with explicit constructors such as `NewCollector` and `NewProvider`.
+- Prefer small structs with explicit constructors such as `collector.New` and `provider.New`.
 - Keep types and functions unexported unless another package must use them.
 - Wrap errors with `fmt.Errorf("context: %w", err)`.
 - Accept `context.Context` on operations that block, poll, fetch, or export.
@@ -118,7 +117,7 @@ import (
 	
 	"go.opentelemetry.io/otel"
 	
-	"github.com/yourorg/gopher-pulse/internal/provider"
+	"github.com/mhighto/gopher-pulse/internal/provider"
 )
 ```
 
@@ -132,7 +131,7 @@ import (
 ### Types and Interfaces
 
 - Keep interfaces small. Prefer specific interfaces close to usage.
-- Use explicit constructors like `NewCollector(...)` and `NewProvider(...)`.
+- Use explicit constructors like `collector.New(...)` and `provider.New(...)`.
 - Accept `context.Context` on all I/O operations: fetching, polling, exporting.
 - Do not use package-level global variables for configuration, loggers, clients, or meters.
 - Prefer composition over inheritance-style abstraction.
@@ -141,13 +140,14 @@ Example:
 
 ```go
 type Collector struct {
-	providers []Provider
+	providers []provider.Provider
+	interval  time.Duration
 	logger    *slog.Logger
 	meter     metric.Meter
 }
 
-func NewCollector(providers []Provider, logger *slog.Logger, meter metric.Meter) *Collector {
-	return &Collector{providers, logger, meter}
+func New(providers []provider.Provider, interval time.Duration, logger *slog.Logger, meter metric.Meter) *Collector {
+	return &Collector{providers, interval, logger, meter}
 }
 
 func (c *Collector) Run(ctx context.Context) error {
@@ -265,7 +265,6 @@ Provider rules:
 The collector orchestrates provider execution and metric emission.
 
 - The collector owns the scrape loop and scheduling.
-- Use `errgroup.WithContext` when concurrent provider execution must stop on the first fatal error.
 - Use a single parent context for coordinated shutdown.
 - Stop loops with context cancellation, not ad hoc boolean flags.
 - Keep provider polling intervals configurable.
@@ -295,8 +294,7 @@ Metric examples:
 
 - `gopher_pulse_github_stars`
 - `gopher_pulse_github_open_issues`
-- `gopher_pulse_provider_scrape_duration_ms`
-- `gopher_pulse_provider_scrape_errors_total`
+- `gopher_pulse_synthetic_wave`
 
 Attribute rules:
 
@@ -329,7 +327,7 @@ Default retry behavior for external APIs:
 - Maximum 3 attempts per collection cycle.
 - Exponential backoff with jitter.
 - Respect rate-limit responses and surface them clearly.
-- If retries fail, emit the error metric and continue the next scheduled cycle.
+- If retries fail, log the failure and continue the next scheduled cycle.
 
 ## Configuration Rules
 

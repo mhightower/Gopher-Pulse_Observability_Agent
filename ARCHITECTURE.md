@@ -23,7 +23,7 @@ The system follows a provider-collector pattern.
 
 This separation keeps data acquisition independent from metric export.
 
-## Planned Project Structure
+## Project Structure
 
 ```text
 .
@@ -37,7 +37,6 @@ This separation keeps data acquisition independent from metric export.
 │   │   └── synthetic/
 │   ├── telemetry/
 │   └── config/
-├── deployments/
 ├── Makefile
 ├── go.mod
 ├── AGENTS.md
@@ -46,11 +45,10 @@ This separation keeps data acquisition independent from metric export.
 
 ## Phase 1 Data Sources
 
-| Source | Type | Purpose | Expected Instrument |
+| Source | Type | Purpose | Instrument |
 | :--- | :--- | :--- | :--- |
 | GitHub | External API | Demonstrate I/O, error handling, and rate limiting | Gauge for stars and open issues |
-| Synthetic | Mathematical signal | Provide deterministic load for testing and demo scenarios | Gauge for wave output |
-| System | Runtime introspection | Expose health of the agent itself | Counter or gauge for runtime state |
+| Synthetic | Mathematical signal | Provide deterministic load for testing and demo scenarios | Gauge for sine-wave output |
 
 ## Core Technical Decisions
 
@@ -59,14 +57,13 @@ This separation keeps data acquisition independent from metric export.
 - Concurrency should be managed centrally to support clean startup and shutdown.
 - Telemetry setup should be explicit and owned by dedicated wiring code.
 
-## MVP Roadmap
+## Roadmap
 
-Phase 1:
+Phase 1 (complete):
 
-- Initialize the OpenTelemetry Prometheus exporter.
-- Implement a GitHub provider for stars and issue counts.
-- Implement a synthetic provider for sine-wave generation.
-- Add local container orchestration for the agent and Prometheus.
+- OpenTelemetry Prometheus exporter.
+- GitHub provider for stars and issue counts.
+- Synthetic provider for sine-wave generation.
 
 Phase 2:
 
@@ -74,10 +71,9 @@ Phase 2:
 - Support dynamic configuration reload.
 - Add health and SLI-oriented endpoints.
 - Introduce histograms for latency distributions.
+- Add local container orchestration for the agent and Prometheus.
 
 ## Development Flow
-
-Initial development commands are expected to look like this once the project files exist:
 
 ```bash
 make build
