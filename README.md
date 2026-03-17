@@ -1,5 +1,7 @@
 # Gopher-Pulse Observability Agent
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 Gopher-Pulse is a Go-based observability agent intended to collect metrics from multiple providers and expose them through OpenTelemetry for Prometheus scraping.
 
 ## Status
@@ -82,3 +84,9 @@ make fmt          # gofmt + goimports
 make clean        # remove binary and coverage artifacts
 make docker-build # build the Docker image only
 ```
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+Copyright (c) 2026 Marcus Hightower

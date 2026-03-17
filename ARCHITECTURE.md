@@ -147,3 +147,9 @@ Grafana is provisioned automatically with the Prometheus datasource and a **Goph
 
 - Keep this file focused on architecture and intent.
 - Keep implementation rules, defaults, and coding constraints in [AGENTS.md](./AGENTS.md).
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+Copyright (c) 2026 Marcus Hightower
