@@ -1,6 +1,6 @@
 # ARCHITECTURE.md: Gopher-Pulse Design Overview
 
-This document captures the project narrative, architectural intent, and roadmap. For coding rules and generation defaults, use [AGENT.md](./AGENT.md).
+This document captures the project narrative, architectural intent, and roadmap. For coding rules and generation defaults, use [AGENTS.md](./AGENTS.md).
 
 ## Executive Summary
 
@@ -40,7 +40,7 @@ This separation keeps data acquisition independent from metric export.
 ├── deployments/
 ├── Makefile
 ├── go.mod
-├── AGENT.md
+├── AGENTS.md
 └── ARCHITECTURE.md
 ```
 
@@ -88,4 +88,4 @@ curl http://localhost:9464/metrics
 ## Notes
 
 - Keep this file focused on architecture and intent.
-- Keep implementation rules, defaults, and coding constraints in [AGENT.md](./AGENT.md).
+- Keep implementation rules, defaults, and coding constraints in [AGENTS.md](./AGENTS.md).
