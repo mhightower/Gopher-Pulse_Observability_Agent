@@ -1,0 +1,29 @@
+run:
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - gofmt
+    - goimports
+    - misspell
+    - gocritic
+  settings:
+    goimports:
+      local-prefixes: github.com/mhightower/gopher-pulse
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+
+issues:
+  exclude-rules:
+    # Test files are allowed to use dot imports and have longer functions.
+    - path: _test\.go
+      linters:
+        - gocritic
