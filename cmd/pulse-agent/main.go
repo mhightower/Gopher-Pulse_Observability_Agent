@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 	"github.com/mhighto/gopher-pulse/internal/collector"
 	"github.com/mhighto/gopher-pulse/internal/config"
 	"github.com/mhighto/gopher-pulse/internal/provider"
+	githubprovider "github.com/mhighto/gopher-pulse/internal/provider/github"
 	"github.com/mhighto/gopher-pulse/internal/provider/synthetic"
 	"github.com/mhighto/gopher-pulse/internal/telemetry"
 )
@@ -43,6 +45,7 @@ func main() {
 	}()
 
 	providers := []provider.Provider{
+		githubprovider.New(cfg.Repo, logger),
 		synthetic.New(10.0, time.Minute),
 	}
 
@@ -56,9 +59,16 @@ func main() {
 		Handler: mux,
 	}
 
+	// Start the listener before the collector so a port conflict fails fast.
+	ln, err := net.Listen("tcp", cfg.Addr)
+	if err != nil {
+		logger.Error("failed to bind metrics address", slog.String("addr", cfg.Addr), slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 	go func() {
 		logger.Info("metrics endpoint listening", slog.String("addr", cfg.Addr))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
 			logger.Error("metrics server error", slog.String("error", err.Error()))
 			cancel()
 		}

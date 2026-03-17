@@ -1,0 +1,27 @@
+# Go binary (make build / make run output)
+pulse-agent
+
+# Go test and coverage artifacts
+coverage.out
+*.test
+
+# Go vendor directory (if added later)
+vendor/
+
+# Editor: VS Code
+.vscode/
+
+# Editor: JetBrains
+.idea/
+
+# Editor: Vim
+*.swp
+*.swo
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+*.env
