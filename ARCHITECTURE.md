@@ -37,6 +37,12 @@ This separation keeps data acquisition independent from metric export.
 │   │   └── synthetic/
 │   ├── telemetry/
 │   └── config/
+├── deployments/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   └── grafana/
+│       └── provisioning/
+├── docker-compose.yml
 ├── Makefile
 ├── go.mod
 ├── AGENTS.md
@@ -64,6 +70,7 @@ Phase 1 (complete):
 - OpenTelemetry Prometheus exporter.
 - GitHub provider for stars and issue counts.
 - Synthetic provider for sine-wave generation.
+- Local observability stack: Prometheus + Grafana via Docker Compose with a pre-provisioned dashboard.
 
 Phase 2:
 
@@ -71,15 +78,31 @@ Phase 2:
 - Support dynamic configuration reload.
 - Add health and SLI-oriented endpoints.
 - Introduce histograms for latency distributions.
-- Add local container orchestration for the agent and Prometheus.
 
 ## Development Flow
 
+### Agent
+
 ```bash
-make build
-./pulse-agent --repo="golang/go" --interval=15s
-curl http://localhost:9464/metrics
+make run          # build and run the agent (foreground)
+make stop         # kill the agent (frees :9464)
 ```
+
+### Local observability stack
+
+```bash
+make stack-up     # start Prometheus + Grafana in Docker
+make stack-down   # stop and remove containers
+make stack-logs   # tail container logs
+```
+
+| Service    | URL                          | Credentials   |
+| :--------- | :--------------------------- | :------------ |
+| Grafana    | http://localhost:3000        | admin / admin |
+| Prometheus | http://localhost:9090        | —             |
+| Agent      | http://localhost:9464/metrics| —             |
+
+Grafana is provisioned automatically with the Prometheus datasource and a **Gopher-Pulse** dashboard. Start the agent first, then `make stack-up` — Prometheus begins scraping on the first 15-second interval.
 
 ## Notes
 

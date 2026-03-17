@@ -3,7 +3,7 @@ CMD        := ./cmd/pulse-agent
 TEST_FLAGS := -race -count=1
 TEST       ?= .
 
-.PHONY: build test coverage lint fmt clean run
+.PHONY: build test coverage lint fmt clean run stop stack-up stack-down stack-logs
 
 build:
 	go build -o $(BINARY) $(CMD)
@@ -27,3 +27,17 @@ clean:
 
 run: build
 	./$(BINARY) --repo="golang/go" --interval=15s
+
+stop:
+	@lsof -ti :9464 | xargs kill 2>/dev/null && echo "pulse-agent stopped" || echo "pulse-agent is not running"
+
+stack-up:
+	docker compose up -d
+	@echo "Grafana: http://localhost:3000  (admin/admin)"
+	@echo "Prometheus: http://localhost:9090"
+
+stack-down:
+	docker compose down
+
+stack-logs:
+	docker compose logs -f

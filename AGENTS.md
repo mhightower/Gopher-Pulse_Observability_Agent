@@ -42,6 +42,12 @@ Unless the user asks for a different shape, use this project structure when crea
 │   │   └── synthetic/
 │   ├── telemetry/
 │   └── config/
+├── deployments/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   └── grafana/
+│       └── provisioning/
+├── docker-compose.yml
 ├── Makefile
 ├── go.mod
 ├── AGENTS.md
@@ -58,8 +64,6 @@ Placement rules:
 - Do not create cross-package utility dumping grounds.
 
 ## Build and Test Commands
-
-Once the project is scaffolded with `go.mod`, use these commands:
 
 ```bash
 # Build the binary
@@ -86,11 +90,24 @@ make lint
 make fmt
 # or: gofmt -w . && goimports -w .
 
-# Run locally with defaults
-./pulse-agent --repo="golang/go" --interval=15s
+# Run agent locally with defaults (foreground)
+make run
+# or: ./pulse-agent --repo="golang/go" --interval=15s
+
+# Stop the agent (kills process holding :9464)
+make stop
 
 # Verify metrics are exposed
 curl http://localhost:9464/metrics
+
+# Start Prometheus + Grafana observability stack
+make stack-up
+
+# Stop the observability stack
+make stack-down
+
+# Tail stack logs
+make stack-logs
 ```
 
 ## Go Conventions
