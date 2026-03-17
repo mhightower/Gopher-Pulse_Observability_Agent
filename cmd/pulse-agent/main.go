@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,63 +9,74 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/sdk/metric"
+	"github.com/mhighto/gopher-pulse/internal/collector"
+	"github.com/mhighto/gopher-pulse/internal/config"
+	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhighto/gopher-pulse/internal/provider/synthetic"
+	"github.com/mhighto/gopher-pulse/internal/telemetry"
 )
 
 func main() {
-	repo := flag.String("repo", "golang/go", "GitHub repository to monitor (owner/name)")
-	interval := flag.Duration("interval", 15*time.Second, "Collection interval")
-	addr := flag.String("addr", ":9464", "Prometheus metrics listen address")
-	flag.Parse()
-
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	exporter, err := prometheus.New()
+	cfg, err := config.Load()
 	if err != nil {
-		logger.Error("failed to create prometheus exporter", slog.String("error", err.Error()))
+		logger.Error("invalid configuration", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
-	provider := metric.NewMeterProvider(metric.WithReader(exporter))
-	defer func() {
-		if err := provider.Shutdown(context.Background()); err != nil {
-			logger.Error("failed to shut down meter provider", slog.String("error", err.Error()))
-		}
-	}()
-
-	logger.Info("starting pulse-agent",
-		slog.String("repo", *repo),
-		slog.Duration("interval", *interval),
-		slog.String("addr", *addr),
-	)
-
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-
-	srv := &http.Server{
-		Addr:    *addr,
-		Handler: mux,
+	tel, err := telemetry.New()
+	if err != nil {
+		logger.Error("failed to initialize telemetry", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	defer func() {
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+		if err := tel.Shutdown(shutdownCtx); err != nil {
+			logger.Error("telemetry shutdown error", slog.String("error", err.Error()))
+		}
+	}()
+
+	providers := []provider.Provider{
+		synthetic.New(10.0, time.Minute),
+	}
+
+	col := collector.New(providers, cfg.Interval, logger, tel.Meter("gopher-pulse"))
+
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", tel.Handler)
+
+	srv := &http.Server{
+		Addr:    cfg.Addr,
+		Handler: mux,
+	}
+
 	go func() {
-		logger.Info("metrics endpoint listening", slog.String("addr", *addr))
+		logger.Info("metrics endpoint listening", slog.String("addr", cfg.Addr))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("metrics server error", slog.String("error", err.Error()))
 			cancel()
 		}
 	}()
 
-	<-ctx.Done()
-	logger.Info("shutting down")
+	logger.Info("starting pulse-agent",
+		slog.String("repo", cfg.Repo),
+		slog.Duration("interval", cfg.Interval),
+		slog.String("addr", cfg.Addr),
+	)
 
+	if err := col.Run(ctx); err != nil {
+		logger.Error("collector error", slog.String("error", err.Error()))
+	}
+
+	logger.Info("shutting down")
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()
-
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Error("server shutdown error", slog.String("error", err.Error()))
 	}
