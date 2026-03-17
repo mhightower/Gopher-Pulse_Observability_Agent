@@ -59,14 +59,14 @@ jobs:
           go test -coverprofile=coverage.out \
             $(go list ./... | grep -v 'cmd/pulse-agent' | grep -v 'internal/telemetry')
 
-      - name: Check coverage threshold (75%)
+      - name: Check coverage threshold (+80%)
         run: |
           TOTAL=$(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}' | tr -d '%')
           echo "Total coverage: ${TOTAL}%"
           awk -v total="$TOTAL" 'BEGIN {
-            if (total + 0 < 75) {
-              print "Coverage " total "% is below required 75%"
+            if (total + 0 < 80) {
+              print "Coverage " total "% is below required 80%"
               exit 1
             }
-            print "Coverage " total "% meets required 75%"
+            print "Coverage " total "% meets required +80%"
           }'

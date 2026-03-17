@@ -101,7 +101,7 @@ Completed:
 - Self-observability metrics (uptime gauge, provider error counter).
 - `/health` liveness endpoint.
 - Full containerised stack via `docker-compose.full.yml` and multi-stage `Dockerfile`.
-- GitHub Actions CI with test, lint, and 75% coverage gate.
+- GitHub Actions CI with test, lint, and +80% coverage gate.
 - `.golangci.yml` with pinned linter set.
 
 Phase 2:

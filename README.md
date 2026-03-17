@@ -15,7 +15,7 @@ The agent is fully operational with self-observability, a health endpoint, CI/CD
 - Clean context-based shutdown
 - Grafana + Prometheus local observability stack via Docker Compose
 - Full containerised stack (agent + Prometheus + Grafana) via `docker-compose.full.yml`
-- GitHub Actions CI: test, lint, and 75% coverage gate
+- GitHub Actions CI: test, lint, and +80% coverage gate
 - `.golangci.yml` with pinned linter set
 
 ## Why This Exists
