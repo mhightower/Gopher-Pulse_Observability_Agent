@@ -28,4 +28,8 @@ USER pulse
 
 EXPOSE 9464
 
+# wget is provided by BusyBox in alpine:3 -- no extra packages needed.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["wget", "-qO-", "http://localhost:9464/health"]
+
 ENTRYPOINT ["./pulse-agent"]
