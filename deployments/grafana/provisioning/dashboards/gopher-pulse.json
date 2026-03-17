@@ -512,7 +512,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "gopher_pulse_agent_uptime_seconds_ratio{provider=\"agent\"}",
+          "expr": "gopher_pulse_agent_uptime_seconds{provider=\"agent\"}",
           "legendFormat": "uptime",
           "refId": "A"
         }
