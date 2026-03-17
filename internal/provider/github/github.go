@@ -144,7 +144,7 @@ func (p *Provider) Collect(ctx context.Context) ([]provider.Measurement, error) 
 func (p *Provider) fetch(ctx context.Context) (*repoResponse, error) {
 	url := fmt.Sprintf("%s/repos/%s", p.baseURL, p.repo)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}
@@ -189,7 +189,7 @@ func (p *Provider) fetch(ctx context.Context) (*repoResponse, error) {
 // backoff returns an exponential backoff duration with jitter for the given attempt (1-based).
 func backoff(attempt int) time.Duration {
 	exp := baseBackoff * time.Duration(1<<uint(attempt-1))
-	jitter := time.Duration(rand.Int63n(int64(exp) / 2)) //nolint:gosec
+	jitter := time.Duration(rand.Int63n(int64(exp) / 2)) //nolint:gosec // weak RNG is fine for backoff jitter; no security requirement here
 	return exp + jitter
 }
 

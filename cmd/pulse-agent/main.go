@@ -21,18 +21,23 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	if err := run(logger); err != nil {
+		logger.Error("fatal error", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+}
+
+func run(logger *slog.Logger) error {
 	startTime := time.Now()
 
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Error("invalid configuration", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	tel, err := telemetry.New()
 	if err != nil {
-		logger.Error("failed to initialize telemetry", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -65,8 +70,7 @@ func main() {
 	// Start the listener before the collector so a port conflict fails fast.
 	ln, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
-		logger.Error("failed to bind metrics address", slog.String("addr", cfg.Addr), slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	go func() {
@@ -95,4 +99,5 @@ func main() {
 	}
 
 	logger.Info("stopped")
+	return nil
 }

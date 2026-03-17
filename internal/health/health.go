@@ -20,7 +20,7 @@ func Handler(start time.Time) http.HandlerFunc {
 		uptime := time.Since(start).Truncate(time.Second)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response{ //nolint:errcheck
+		json.NewEncoder(w).Encode(response{ //nolint:errcheck // writing to http.ResponseWriter rarely fails; the status code is already sent
 			Status: "ok",
 			Uptime: uptime.String(),
 		})
