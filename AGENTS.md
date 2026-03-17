@@ -134,7 +134,7 @@ import (
 	
 	"go.opentelemetry.io/otel"
 	
-	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhightower/gopher-pulse/internal/provider"
 )
 ```
 

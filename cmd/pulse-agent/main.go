@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mhighto/gopher-pulse/internal/collector"
-	"github.com/mhighto/gopher-pulse/internal/config"
-	"github.com/mhighto/gopher-pulse/internal/provider"
-	githubprovider "github.com/mhighto/gopher-pulse/internal/provider/github"
-	"github.com/mhighto/gopher-pulse/internal/provider/synthetic"
-	"github.com/mhighto/gopher-pulse/internal/telemetry"
+	"github.com/mhightower/gopher-pulse/internal/collector"
+	"github.com/mhightower/gopher-pulse/internal/config"
+	"github.com/mhightower/gopher-pulse/internal/provider"
+	githubprovider "github.com/mhightower/gopher-pulse/internal/provider/github"
+	"github.com/mhightower/gopher-pulse/internal/provider/synthetic"
+	"github.com/mhightower/gopher-pulse/internal/telemetry"
 )
 
 func main() {

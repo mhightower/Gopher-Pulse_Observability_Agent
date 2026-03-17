@@ -1,4 +1,4 @@
-module github.com/mhighto/gopher-pulse
+module github.com/mhightower/gopher-pulse
 
 go 1.25.6
 

@@ -10,7 +10,7 @@ import (
 
 	"go.opentelemetry.io/otel/metric"
 
-	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhightower/gopher-pulse/internal/provider"
 )
 
 // Collector runs each registered provider on a fixed interval and records

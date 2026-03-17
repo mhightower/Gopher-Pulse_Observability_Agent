@@ -7,7 +7,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhightower/gopher-pulse/internal/provider"
 )
 
 // Provider emits a sine-wave value derived from the current time.

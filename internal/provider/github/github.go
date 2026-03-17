@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhightower/gopher-pulse/internal/provider"
 )
 
 const (

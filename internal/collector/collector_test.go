@@ -11,7 +11,7 @@ import (
 
 	"go.opentelemetry.io/otel/metric/noop"
 
-	"github.com/mhighto/gopher-pulse/internal/provider"
+	"github.com/mhightower/gopher-pulse/internal/provider"
 )
 
 // stubProvider is a controllable provider for testing.
