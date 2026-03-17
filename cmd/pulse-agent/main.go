@@ -12,6 +12,7 @@ import (
 
 	"github.com/mhightower/gopher-pulse/internal/collector"
 	"github.com/mhightower/gopher-pulse/internal/config"
+	"github.com/mhightower/gopher-pulse/internal/health"
 	"github.com/mhightower/gopher-pulse/internal/provider"
 	githubprovider "github.com/mhightower/gopher-pulse/internal/provider/github"
 	"github.com/mhightower/gopher-pulse/internal/provider/synthetic"
@@ -20,6 +21,7 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	startTime := time.Now()
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -53,6 +55,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", tel.Handler)
+	mux.Handle("/health", health.Handler(startTime))
 
 	srv := &http.Server{
 		Addr:    cfg.Addr,

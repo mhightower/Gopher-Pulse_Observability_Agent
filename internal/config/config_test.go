@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"os"
 	"testing"
 	"time"
@@ -85,6 +86,65 @@ func TestEnvFallback(t *testing.T) {
 		got := envDuration("PULSE_INTERVAL", 15*time.Second)
 		if got != 15*time.Second {
 			t.Errorf("envDuration() = %v, want %v", got, 15*time.Second)
+		}
+	})
+
+	t.Run("uses fallback when duration env not set", func(t *testing.T) {
+		os.Unsetenv("PULSE_INTERVAL")
+		got := envDuration("PULSE_INTERVAL", 15*time.Second)
+		if got != 15*time.Second {
+			t.Errorf("envDuration() = %v, want %v", got, 15*time.Second)
+		}
+	})
+}
+
+func TestLoad(t *testing.T) {
+	t.Run("loads config from environment variables", func(t *testing.T) {
+		os.Setenv("PULSE_REPO", "owner/repo")
+		os.Setenv("PULSE_INTERVAL", "30s")
+		os.Setenv("PULSE_ADDR", ":8080")
+		defer os.Unsetenv("PULSE_REPO")
+		defer os.Unsetenv("PULSE_INTERVAL")
+		defer os.Unsetenv("PULSE_ADDR")
+
+		// Reset flags so flag.Parse() doesn't conflict with test runner args.
+		oldArgs := os.Args
+		os.Args = []string{"test"}
+		defer func() { os.Args = oldArgs }()
+
+		// flag package maintains global state; reset between test runs.
+		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("Load() unexpected error: %v", err)
+		}
+		if cfg.Repo != "owner/repo" {
+			t.Errorf("Repo = %q, want %q", cfg.Repo, "owner/repo")
+		}
+		if cfg.Interval != 30*time.Second {
+			t.Errorf("Interval = %v, want %v", cfg.Interval, 30*time.Second)
+		}
+		if cfg.Addr != ":8080" {
+			t.Errorf("Addr = %q, want %q", cfg.Addr, ":8080")
+		}
+	})
+
+	t.Run("returns error for zero interval flag", func(t *testing.T) {
+		os.Setenv("PULSE_REPO", "owner/repo")
+		os.Setenv("PULSE_ADDR", ":9464")
+		defer os.Unsetenv("PULSE_REPO")
+		defer os.Unsetenv("PULSE_ADDR")
+
+		oldArgs := os.Args
+		os.Args = []string{"test", "--interval=0s"}
+		defer func() { os.Args = oldArgs }()
+
+		flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+
+		_, err := Load()
+		if err == nil {
+			t.Error("Load() expected error for zero interval, got nil")
 		}
 	})
 }

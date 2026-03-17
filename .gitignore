@@ -1,5 +1,5 @@
-# Go binary (make build / make run output)
-pulse-agent
+# Go binary (make build / make run output) — root-level compiled binary only
+/pulse-agent
 
 # Go test and coverage artifacts
 coverage.out

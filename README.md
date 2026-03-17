@@ -4,14 +4,19 @@ Gopher-Pulse is a Go-based observability agent intended to collect metrics from 
 
 ## Status
 
-Phase 1 is complete and the agent is fully operational:
+The agent is fully operational with self-observability, a health endpoint, CI/CD, and a containerised full-stack deployment option:
 
 - OpenTelemetry Prometheus exporter setup
 - GitHub provider for stars and open issue counts
 - Synthetic provider for deterministic signal generation
+- Self-observability metrics: agent uptime gauge and per-provider error counter
+- Health endpoint (`/health`) reporting uptime and liveness
 - Structured JSON logging via `log/slog`
 - Clean context-based shutdown
 - Grafana + Prometheus local observability stack via Docker Compose
+- Full containerised stack (agent + Prometheus + Grafana) via `docker-compose.full.yml`
+- GitHub Actions CI: test, lint, and 75% coverage gate
+- `.golangci.yml` with pinned linter set
 
 ## Why This Exists
 
@@ -31,14 +36,21 @@ The project is meant to demonstrate a practical observability agent with an emph
 
 ## Quick Start
 
-### Run the agent
+### Run the agent locally
 
 ```bash
 make run          # build and run (foreground)
 make stop         # kill the agent by port
 ```
 
-### Start the observability stack (Grafana + Prometheus)
+Endpoints while the agent is running:
+
+- **Metrics:** `http://localhost:9464/metrics`
+- **Health:** `http://localhost:9464/health`
+
+### Start the observability stack (host agent + Grafana + Prometheus)
+
+This starts Prometheus and Grafana in Docker and scrapes the agent running on the host.
 
 ```bash
 make stack-up     # start containers in the background
@@ -49,7 +61,15 @@ make stack-logs   # tail container logs
 - **Grafana:** `http://localhost:3000` — login `admin` / `admin`
   - The **Gopher-Pulse** dashboard is pre-provisioned under Dashboards
 - **Prometheus:** `http://localhost:9090`
-- **Metrics endpoint:** `http://localhost:9464/metrics`
+
+### Start the full containerised stack (agent + Prometheus + Grafana)
+
+Builds the agent image and starts all three services in Docker.
+
+```bash
+make stack-full-up    # docker build + compose up
+make stack-full-down  # stop and remove containers
+```
 
 ### Other commands
 
@@ -60,4 +80,5 @@ make coverage     # run tests with coverage report
 make lint         # run golangci-lint
 make fmt          # gofmt + goimports
 make clean        # remove binary and coverage artifacts
+make docker-build # build the Docker image only
 ```

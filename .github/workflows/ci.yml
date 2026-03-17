@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: true
+
+      - name: Run tests
+        run: go test -race -count=1 ./...
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: true
+
+      - name: Run tests with coverage
+        # Exclude cmd/pulse-agent (main entrypoint) and internal/telemetry (OTel
+        # wiring) from the coverage gate — both are integration-level packages
+        # with no unit-testable business logic.
+        run: |
+          go test -coverprofile=coverage.out \
+            $(go list ./... | grep -v 'cmd/pulse-agent' | grep -v 'internal/telemetry')
+
+      - name: Check coverage threshold (75%)
+        run: |
+          TOTAL=$(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}' | tr -d '%')
+          echo "Total coverage: ${TOTAL}%"
+          awk -v total="$TOTAL" 'BEGIN {
+            if (total + 0 < 75) {
+              print "Coverage " total "% is below required 75%"
+              exit 1
+            }
+            print "Coverage " total "% meets required 75%"
+          }'
